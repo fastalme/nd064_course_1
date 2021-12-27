@@ -83,11 +83,12 @@ def create():
 #Healthcheck endpoint
 @app.route('/healthz')
 def healthz():
+    error = 0
     try:
         connection = get_db_connection()
-        post = connection.execute('SELECT * FROM posts WHERE id = ?', (post_id,)).fetchone()
+        post = connection.execute('SELECT * FROM posts').fetchone()
     except:
-        e = sys.exc_info()[0]
+        e = sys.exc_info()[1]
         app.logger.error('Unexpected error: "%s"', e)
         error = 1
     finally:
