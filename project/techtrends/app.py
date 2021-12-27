@@ -1,4 +1,5 @@
 import sqlite3
+import sys
 
 from flask import Flask, jsonify, json, render_template, request, url_for, redirect, flash
 from werkzeug.exceptions import abort
@@ -82,11 +83,29 @@ def create():
 #Healthcheck endpoint
 @app.route('/healthz')
 def healthz():
-    response = app.response_class(
+    try:
+        connection = get_db_connection()
+        post = connection.execute('SELECT * FROM posts WHERE id = ?', (post_id,)).fetchone()
+    except:
+        e = sys.exc_info()[0]
+        app.logger.error('Unexpected error: "%s"', e)
+        error = 1
+    finally:
+        try:
+            connection.close()
+        except:
+            app.logger.info('Error al cerrar la conexion')
+    
+    if error == 1:
+        response = app.response_class(
+            response=json.dumps({"result":"ERROR - unhealthy"}),
+            status=500,
+            mimetype='application/json')
+    else:
+        response = app.response_class(
             response=json.dumps({"result":"OK - healthy"}),
             status=200,
-            mimetype='application/json'
-    )
+            mimetype='application/json')
 
     return response
 
