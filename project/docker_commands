@@ -1,5 +1,5 @@
 ## Docker commands used to build the application 
-docker build -t techtrends ./project
+docker build -t techtrends .
 
 ## Docker commands used to run the application
 docker run -d -p 7111:3111 --name techtrends-app techtrends

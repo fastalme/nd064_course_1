@@ -14,7 +14,7 @@ spec:
         app: techtrends
     spec:
       containers:
-      - image: techtrends:latest
+      - image: fastalme/techtrends:latest
         name: techtrends
         resources:
           requests:
