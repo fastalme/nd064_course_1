@@ -80,7 +80,7 @@ def post(post_id):
       app.logger.info('Article does not exist')
       return render_template('404.html'), 404
     else:
-      app.logger.info('"%s" article retrieved', post['title'])
+      app.logger.info('%r article retrieved', post['title'])
       return render_template('post.html', post=post)
 
 # Define the About Us page
