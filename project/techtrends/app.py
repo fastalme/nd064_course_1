@@ -1,17 +1,46 @@
 import sqlite3
 import sys
+import logging.config
 
 from flask import Flask, jsonify, json, render_template, request, url_for, redirect, flash
 from werkzeug.exceptions import abort
 
-from logging.config import dictConfig
-
-dictConfig({
+LOGGING_CONFIG = { 
     'version': 1,
-    'root': {
-        'level': 'INFO'
-    }
-})
+    'disable_existing_loggers': True,
+    'formatters': { 
+        'standard': { 
+            'format': '%(asctime)s [%(levelname)s] %(name)s: %(message)s'
+        },
+    },
+    'handlers': { 
+        'default': { 
+            'level': 'DEBUG',
+            'formatter': 'standard',
+            'class': 'logging.StreamHandler',
+            'stream': 'ext://sys.stdout',  # Default is stderr
+        },
+    },
+    'loggers': { 
+        '': {  # root logger
+            'handlers': ['default'],
+            'level': 'WARNING',
+            'propagate': False
+        },
+        'app': { 
+            'handlers': ['default'],
+            'level': 'DEBUG',
+            'propagate': False
+        },
+        '__main__': {  # if __name__ == '__main__'
+            'handlers': ['default'],
+            'level': 'DEBUG',
+            'propagate': False
+        },
+    } 
+}
+
+logging.config.dictConfig(LOGGING_CONFIG)
 
 # Function to get a database connection.
 # This function connects to database with the name `database.db`
@@ -27,13 +56,12 @@ def get_post(post_id):
     post = connection.execute('SELECT * FROM posts WHERE id = ?',
                         (post_id,)).fetchone()
     connection.close()
-    app.logger.info('"%s" article retrieved', post['title'])
     return post
 
 # Define the Flask application
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your secret key'
-app.db_connection_count = 1
+app.db_connection_count = 0
 
 # Define the main route of the web application 
 @app.route('/')
@@ -52,6 +80,7 @@ def post(post_id):
       app.logger.info('Article does not exist')
       return render_template('404.html'), 404
     else:
+      app.logger.info('"%s" article retrieved', post['title'])
       return render_template('post.html', post=post)
 
 # Define the About Us page
